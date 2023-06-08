@@ -9,7 +9,7 @@ import (
 // default configuration
 const (
 	// 默认的数据库类型
-	_defaultDBType = "sqlite"
+	_defaultDBType = "sqlite3"
 	// 默认的数据库文件
 	_defaultDB = "./sqlite.db"
 	// 默认日志文件路径
@@ -33,7 +33,7 @@ const (
 	// mysql数据库
 	Mysql dbType = "mysql"
 	// sqlite数据库
-	Sqlite3 dbType = "sqlite"
+	Sqlite3 dbType = "sqlite3"
 )
 
 // 数据库配置
@@ -104,12 +104,12 @@ var (
 )
 
 // Load 加载配置，只在程序启动时加载一次
-func Load(path string) error {
+func Load(dir, name string) error {
 	lock = new(sync.RWMutex)
 	lock.Lock()
 	defer lock.Unlock()
 	config = new(Config)
-	err := fig.Load(config, fig.File(path))
+	err := fig.Load(config, fig.Dirs(dir), fig.File(name))
 	if err != nil {
 		return err
 	}
