@@ -9,9 +9,11 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var sugaredLogger *zap.SugaredLogger
-
-var logLevel = zap.NewAtomicLevel()
+var (
+	logger        *zap.Logger
+	sugaredLogger *zap.SugaredLogger
+	logLevel      = zap.NewAtomicLevel()
+)
 
 // InitLogger 初始化日志
 // 使用方式；
@@ -19,15 +21,19 @@ var logLevel = zap.NewAtomicLevel()
 //
 //	logger := log.InitLogger()
 //	defer logger.Sync()
-func InitLogger() *zap.SugaredLogger {
+func InitLogger() *zap.Logger {
 	setLevel()
 	writeSyncer := getLogWriter()
 	encoder := getEncoder()
 	core := zapcore.NewCore(encoder, writeSyncer, logLevel)
 
-	logger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
+	logger = zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
 	sugaredLogger = logger.Sugar()
-	return sugaredLogger
+	return logger
+}
+
+func Sync() {
+	sugaredLogger.Sync()
 }
 
 func setLevel() {
