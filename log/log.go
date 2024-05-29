@@ -121,8 +121,8 @@ func Errorf(template string, args ...interface{}) {
 	sugaredLogger.Errorf(template, args...)
 }
 
-func Errorw(msg string, args ...interface{}) {
-	sugaredLogger.Errorw(msg, args...)
+func Errorw(err error, args ...interface{}) {
+	sugaredLogger.Errorw(err.Error(), args...)
 }
 
 func Fatal(args ...interface{}) {
