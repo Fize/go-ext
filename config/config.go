@@ -8,148 +8,129 @@ import (
 
 // default configuration
 const (
-	// 默认的数据库类型
+	// default database type
 	_defaultDBType = "sqlite3"
-	// 默认的数据库文件
+	// default database file
 	_defaultDB = "./sqlite.db"
-	// 默认日志文件路径
+	// default log path
 	_defaultLogPath = "./zap.log"
-	// 默认日志级别
+	// default log level
 	_defaultLogLevel = "info"
-	// 默认日志
+	// default log file max size
 	_defaultLogMaxSize = 10
-	// 默认日志备份数
+	// default log max backups
 	_defaultLogMaxBackups = 5
-	// 默认日志最大保存时间
+	// default log max age
 	_defaultLogMaxAge = 30
-	// 默认日志格式
+	// default log format
 	_defaultLogFormat = "string"
 )
 
-// dbType 数据库类型
 type dbType string
 
 const (
-	// mysql数据库
-	Mysql dbType = "mysql"
-	// sqlite数据库
+	Mysql   dbType = "mysql"
 	Sqlite3 dbType = "sqlite3"
 )
 
-// 数据库配置
+// DBConfig
 type DBConfig struct {
-	// 数据库类型，只支持mysql 和 sqlite，默认 sqllite
+	// database type only support mysql and sqlite, default sqlite
 	Type dbType `fig:"type"`
-	// 数据库地址，此部分包含了端口号 127.0.0.1:3306
+	// database host, include port such as 127.0.0.1:3306
 	Host string `fig:"host"`
-	// 用户名
+	// database user
 	User string `fig:"user"`
-	// 密码
+	// database password
 	Password string `fig:"password"`
-	// 数据库名
-	DB string `fig:"db"`
-	// 连接池配置
-	MaxIdleConns int `fig:"maxIdleConns"`
-	MaxOpenConns int `fig:"maxOpenConns"`
-	// 开启详细的sql日志
+	// database name
+	DB           string `fig:"db"`
+	MaxIdleConns int    `fig:"maxIdleConns"`
+	MaxOpenConns int    `fig:"maxOpenConns"`
+	// print raw sql
 	SqlDebug bool `fig:"sqlDebug"`
 }
 
-// 邮件配置
+// Email
 type Email struct {
-	// 邮件账号用户名
-	Account string `fig:"account"`
-	// smtp地址
-	SMTP string `fig:"smtp"`
-	// smtp端口
-	Port int `fig:"port"`
-	// 密码
+	Account  string `fig:"account"`
+	SMTP     string `fig:"smtp"`
+	Port     int    `fig:"port"`
 	Password string `fig:"password"`
 }
 
-// 日志配置
+// Log
 type Log struct {
-	// 日志文件路径
+	// log file path
 	Filename string `fig:"filename"`
-	// 日志文件最大大小，单位MB
+	// log file max size, unit MB
 	MaxSize int `fig:"maxSize"`
-	// 日志文件最大备份数量
+	// log file max backups
 	MaxBackups int `fig:"maxBackups"`
-	// 日志文件最大保存时间，单位天
+	// log file max age, unit day
 	MaxAge int `fig:"maxAge"`
-	// 是否压缩
+	// log file compress
 	Compress bool `fig:"compress"`
-	// 日志级别
+	// log level
 	Level string `fig:"level"`
-	// 日志格式
+	// log format
 	Format string `fig:"format"`
-	// 输出方式
+	// log output
 	Output string `fig:"output"`
 }
 
-// 全局配置
+// Config
 type Config struct {
-	// 数据库配置
-	DB *DBConfig `fig:"db"`
-	// 邮件配置
-	Email *Email `fig:"email"`
-	// 日志配置
-	Log *Log `fig:"log"`
+	DB    *DBConfig `fig:"db"`
+	Email *Email    `fig:"email"`
+	Log   *Log      `fig:"log"`
 }
 
-// 配置内容
 var (
-	lock   *sync.RWMutex
 	config *Config
+	once   = sync.Once{}
 )
 
-// Load 加载配置，只在程序启动时加载一次
-func Load(dir, name string) error {
-	lock = new(sync.RWMutex)
-	lock.Lock()
-	defer lock.Unlock()
-	config = new(Config)
-	err := fig.Load(config, fig.Dirs(dir), fig.File(name))
-	if err != nil {
-		return err
-	}
-	// 设置默认数据库类型为sqlite
-	if config.DB == nil {
-		config.DB = new(DBConfig)
-	}
-	if config.DB.Type != Mysql && config.DB.Type != Sqlite3 {
-		config.DB.Type = _defaultDBType
-	}
-	// 当使用sqlite时设置默认数据库文件
-	if config.DB.Type == Sqlite3 && config.DB.DB == "" {
-		config.DB.DB = _defaultDB
-	}
-	// 设置默认日志配置
-	if config.Log == nil {
-		config.Log = new(Log)
-	}
-	if config.Log.Filename == "" {
-		config.Log.Filename = _defaultLogPath
-	}
-	if config.Log.MaxSize == 0 {
-		config.Log.MaxSize = _defaultLogMaxSize
-	}
-	if config.Log.MaxBackups == 0 {
-		config.Log.MaxBackups = _defaultLogMaxBackups
-	}
-	if config.Log.MaxAge == 0 {
-		config.Log.MaxAge = _defaultLogMaxAge
-	}
-	if config.Log.Level == "" {
-		config.Log.Level = _defaultLogLevel
-	}
-	if config.Log.Format != "json" {
-		config.Log.Format = _defaultLogFormat
-	}
-	return nil
+func Load(dir, name string) {
+	once.Do(func() {
+		config = new(Config)
+		err := fig.Load(config, fig.Dirs(dir), fig.File(name))
+		if err != nil {
+			panic(err)
+		}
+		if config.DB == nil {
+			config.DB = new(DBConfig)
+		}
+		if config.DB.Type != Mysql && config.DB.Type != Sqlite3 {
+			config.DB.Type = _defaultDBType
+		}
+		if config.DB.Type == Sqlite3 && config.DB.DB == "" {
+			config.DB.DB = _defaultDB
+		}
+		if config.Log == nil {
+			config.Log = new(Log)
+		}
+		if config.Log.Filename == "" {
+			config.Log.Filename = _defaultLogPath
+		}
+		if config.Log.MaxSize == 0 {
+			config.Log.MaxSize = _defaultLogMaxSize
+		}
+		if config.Log.MaxBackups == 0 {
+			config.Log.MaxBackups = _defaultLogMaxBackups
+		}
+		if config.Log.MaxAge == 0 {
+			config.Log.MaxAge = _defaultLogMaxAge
+		}
+		if config.Log.Level == "" {
+			config.Log.Level = _defaultLogLevel
+		}
+		if config.Log.Format != "json" {
+			config.Log.Format = _defaultLogFormat
+		}
+	})
 }
 
-// Read 读取配置
 func Read() *Config {
 	return config
 }

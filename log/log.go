@@ -15,12 +15,8 @@ var (
 	logLevel      = zap.NewAtomicLevel()
 )
 
-// InitLogger 初始化日志
-// 使用方式；
-// 在main函数中调用，如下：
-//
-//	logger := log.InitLogger()
-//	defer logger.Sync()
+// logger := log.InitLogger()
+// defer logger.Sync()
 func InitLogger() *zap.Logger {
 	setLevel()
 	writeSyncer := getLogWriter()

@@ -9,14 +9,12 @@ import (
 func TestLoad(t *testing.T) {
 	dir := "/tmp"
 	name := "config_test.yaml"
-	// 创建一个yaml格式的临时文件
 	tmpfile, err := os.Create(filepath.Join(dir, name))
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(tmpfile.Name())
 
-	// 写入一个配置文件，yaml格式
 	configData := `db:
   type: sqlite3
   db: test.db
@@ -31,13 +29,8 @@ log:
 		t.Fatal(err)
 	}
 
-	// 加载配置文件
-	err = Load(dir, name)
-	if err != nil {
-		t.Fatal(err)
-	}
+	Load(dir, name)
 
-	// 检查配置是否正确加载
 	if config.DB.Type != "sqlite3" {
 		t.Errorf("DB.Type = %q; want %q", config.DB.Type, "sqlite3")
 	}

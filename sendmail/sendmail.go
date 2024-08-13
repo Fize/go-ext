@@ -66,7 +66,7 @@ func sendMailUsingTLS(addr string, auth smtp.Auth, from string,
 	return c.Quit()
 }
 
-// SendEmail 发送邮件
+// SendEmail send email
 func SendEmail(headerTitle, smtpServer, email, password, to, subject, body string, port int) error {
 	header := make(map[string]string)
 	header["From"] = headerTitle + "<" + email + ">"
