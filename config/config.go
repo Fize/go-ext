@@ -1,55 +1,16 @@
+// config package is a package for managing application configuration.
+// It provides a BaseConfig struct that holds the configuration for the application.
+// The package also provides functions to load the configuration from a file or environment variables, set default values, and validate the configuration.
 package config
 
 import (
+	"fmt"
+	"strings"
 	"sync"
 
-	"github.com/kkyr/fig"
+	"github.com/mitchellh/mapstructure"
+	"github.com/spf13/viper"
 )
-
-// default configuration
-const (
-	// default database type
-	_defaultDBType = "sqlite3"
-	// default database file
-	_defaultDB = "./sqlite.db"
-	// default log path
-	_defaultLogPath = "./zap.log"
-	// default log level
-	_defaultLogLevel = "info"
-	// default log file max size
-	_defaultLogMaxSize = 10
-	// default log max backups
-	_defaultLogMaxBackups = 5
-	// default log max age
-	_defaultLogMaxAge = 30
-	// default log format
-	_defaultLogFormat = "string"
-)
-
-type dbType string
-
-const (
-	Mysql   dbType = "mysql"
-	Sqlite3 dbType = "sqlite3"
-)
-
-// DBConfig
-type DBConfig struct {
-	// database type only support mysql and sqlite, default sqlite
-	Type dbType `fig:"type"`
-	// database host, include port such as 127.0.0.1:3306
-	Host string `fig:"host"`
-	// database user
-	User string `fig:"user"`
-	// database password
-	Password string `fig:"password"`
-	// database name
-	DB           string `fig:"db"`
-	MaxIdleConns int    `fig:"maxIdleConns"`
-	MaxOpenConns int    `fig:"maxOpenConns"`
-	// print raw sql
-	SqlDebug bool `fig:"sqlDebug"`
-}
 
 // Email
 type Email struct {
@@ -59,78 +20,193 @@ type Email struct {
 	Password string `fig:"password"`
 }
 
-// Log
-type Log struct {
-	// log file path
-	Filename string `fig:"filename"`
-	// log file max size, unit MB
-	MaxSize int `fig:"maxSize"`
-	// log file max backups
-	MaxBackups int `fig:"maxBackups"`
-	// log file max age, unit day
-	MaxAge int `fig:"maxAge"`
-	// log file compress
-	Compress bool `fig:"compress"`
-	// log level
-	Level string `fig:"level"`
-	// log format
-	Format string `fig:"format"`
-	// log output
-	Output string `fig:"output"`
+var once sync.Once
+
+// NewConfig creates a new configuration with default values
+func NewConfig() *BaseConfig {
+	return &BaseConfig{
+		Server: defaultServerConfig(),
+		SQL:    defaultSQLConfig(),
+		Log:    defaultLogConfig(),
+	}
 }
 
-// Config
-type Config struct {
-	DB    *DBConfig `fig:"db"`
-	Email *Email    `fig:"email"`
-	Log   *Log      `fig:"log"`
+// BaseConfig is the base configuration
+type BaseConfig struct {
+	// server configuration
+	Server *ServerConfig `mapstructure:"server"`
+	// SQL database configuration
+	SQL *SQLConfig `mapstructure:"sql"`
+	// log configuration
+	Log *LogConfig `mapstructure:"log"`
+	// custom configuration, can be any type
+	Custom interface{} `mapstructure:"custom"`
 }
 
-var (
-	config *Config
-	once   = sync.Once{}
-)
+// WithCustomConfig sets the custom configuration
+func WithCustomConfig(custom interface{}) func(*BaseConfig) {
+	return func(bc *BaseConfig) {
+		bc.Custom = custom
+	}
+}
 
-func Load(dir, name string) {
+// ParseCustomConfig parses the custom configuration into the provided interface
+func (bc *BaseConfig) ParseCustomConfig(out interface{}) error {
+	if bc.Custom == nil {
+		return nil
+	}
+
+	// Use mapstructure to convert the custom config to the desired type
+	config := &mapstructure.DecoderConfig{
+		Result:           out,
+		WeaklyTypedInput: true,
+		TagName:          "mapstructure",
+		// Disable case insensitive matching
+		MatchName: func(mapKey, fieldName string) bool {
+			return mapKey == fieldName
+		},
+	}
+
+	decoder, err := mapstructure.NewDecoder(config)
+	if err != nil {
+		return fmt.Errorf("failed to create decoder: %v", err)
+	}
+
+	return decoder.Decode(bc.Custom)
+}
+
+// Load loads configuration from the specified file and optionally parses custom config
+// name: configuration file path
+// env: whether to load from environment variables
+func (bc *BaseConfig) Load(name string, env bool) {
 	once.Do(func() {
-		config = new(Config)
-		err := fig.Load(config, fig.Dirs(dir), fig.File(name))
-		if err != nil {
+		v := viper.New()
+
+		// Configure Viper to preserve key case sensitivity
+		v.SetEnvPrefix("ext")
+		v.AutomaticEnv()
+		v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+		v.AllowEmptyEnv(true)
+
+		if !env {
+			v.SetConfigFile(name)
+			if err := v.ReadInConfig(); err != nil {
+				panic(fmt.Errorf("failed to read config file: %v", err))
+			}
+		}
+
+		// Set default values
+		bc.setDefaults(v)
+
+		// Use Viper's Unmarshal to parse the configuration
+		if err := v.Unmarshal(bc, func(dc *mapstructure.DecoderConfig) {
+			dc.TagName = "mapstructure"
+		}); err != nil {
+			panic(fmt.Errorf("failed to unmarshal config: %v", err))
+		}
+
+		// Initialize and validate configuration
+		if err := bc.initAndValidate(); err != nil {
 			panic(err)
-		}
-		if config.DB == nil {
-			config.DB = new(DBConfig)
-		}
-		if config.DB.Type != Mysql && config.DB.Type != Sqlite3 {
-			config.DB.Type = _defaultDBType
-		}
-		if config.DB.Type == Sqlite3 && config.DB.DB == "" {
-			config.DB.DB = _defaultDB
-		}
-		if config.Log == nil {
-			config.Log = new(Log)
-		}
-		if config.Log.Filename == "" {
-			config.Log.Filename = _defaultLogPath
-		}
-		if config.Log.MaxSize == 0 {
-			config.Log.MaxSize = _defaultLogMaxSize
-		}
-		if config.Log.MaxBackups == 0 {
-			config.Log.MaxBackups = _defaultLogMaxBackups
-		}
-		if config.Log.MaxAge == 0 {
-			config.Log.MaxAge = _defaultLogMaxAge
-		}
-		if config.Log.Level == "" {
-			config.Log.Level = _defaultLogLevel
-		}
-		if config.Log.Format != "json" {
-			config.Log.Format = _defaultLogFormat
 		}
 	})
 }
 
-func Read() *Config {
-	return config
+// setDefaults sets default values for the configuration
+func (bc *BaseConfig) setDefaults(v *viper.Viper) {
+	// Set default database configuration
+	v.SetDefault("sql.type", defaultSQLConfig().Type)
+	v.SetDefault("sql.host", defaultSQLConfig().Host)
+	v.SetDefault("sql.user", defaultSQLConfig().User)
+	v.SetDefault("sql.password", defaultSQLConfig().Password)
+	v.SetDefault("sql.db", defaultSQLConfig().DB)
+	v.SetDefault("sql.maxIdleConns", defaultSQLConfig().MaxIdleConns)
+	v.SetDefault("sql.maxOpenConns", defaultSQLConfig().MaxOpenConns)
+	v.SetDefault("sql.debug", defaultSQLConfig().Debug)
+
+	// Set default log configuration
+	v.SetDefault("log.filename", defaultLogConfig().Filename)
+	v.SetDefault("log.maxSize", defaultLogConfig().MaxSize)
+	v.SetDefault("log.maxBackups", defaultLogConfig().MaxBackups)
+	v.SetDefault("log.maxAge", defaultLogConfig().MaxAge)
+	v.SetDefault("log.compress", defaultLogConfig().Compress)
+	v.SetDefault("log.level", defaultLogConfig().Level)
+	v.SetDefault("log.format", defaultLogConfig().Format)
+	v.SetDefault("log.output", defaultLogConfig().Output)
+
+	// Set default server configuration
+	v.SetDefault("server.bindAddr", defaultServerConfig().BindAddr)
+
+	// Set default ServerMetrics
+	v.SetDefault("server.metrics.path", defaultServerConfig().Metrics.Path)
+	v.SetDefault("server.metrics.port", defaultServerConfig().Metrics.Port)
+	v.SetDefault("server.metrics.enabled", defaultServerConfig().Metrics.Enabled)
+	v.SetDefault("server.metrics.serviceName", defaultServerConfig().Metrics.ServiceName)
+	v.SetDefault("server.metrics.excludeItem", defaultServerConfig().Metrics.ExcludeItem)
+	v.SetDefault("server.metrics.timeSensitive", defaultServerConfig().Metrics.TimeSensitive)
+
+	// Set default ServerTrace
+	v.SetDefault("server.trace.enabled", defaultServerConfig().Trace.Enabled)
+	v.SetDefault("server.trace.serviceName", defaultServerConfig().Trace.ServiceName)
+	v.SetDefault("server.trace.stdout", defaultServerConfig().Trace.Stdout)
+	v.SetDefault("server.trace.endpoint", defaultServerConfig().Trace.Endpoint)
+	v.SetDefault("server.trace.excludeItem", defaultServerConfig().Trace.ExcludeItem)
+}
+
+// initAndValidate initializes and validates the configuration
+func (bc *BaseConfig) initAndValidate() error {
+	// Validate SQL config
+	sqlCfg, err := NewSQLConfig(
+		WithType(bc.SQL.Type),
+		WithHost(bc.SQL.Host),
+		WithUser(bc.SQL.User),
+		WithPassword(bc.SQL.Password),
+		WithDB(bc.SQL.DB),
+		WithMaxIdleConns(bc.SQL.MaxIdleConns),
+		WithMaxOpenConns(bc.SQL.MaxOpenConns),
+		WithDebug(bc.SQL.Debug),
+	)
+	if err != nil {
+		return fmt.Errorf("invalid SQL config: %v", err)
+	}
+	bc.SQL = sqlCfg
+
+	// Validate Log config
+	logCfg, err := NewLogConfig(
+		WithFilename(bc.Log.Filename),
+		WithMaxSize(bc.Log.MaxSize),
+		WithMaxBackups(bc.Log.MaxBackups),
+		WithMaxAge(bc.Log.MaxAge),
+		WithCompress(bc.Log.Compress),
+		WithLevel(bc.Log.Level),
+		WithFormat(bc.Log.Format),
+		WithOutput(bc.Log.Output),
+	)
+	if err != nil {
+		return fmt.Errorf("invalid Log config: %v", err)
+	}
+	bc.Log = logCfg
+
+	serCfg, err := NewServerConfig(
+		WithBindAddr(bc.Server.BindAddr),
+		WithMetrics(bc.Server.Metrics),
+		WithMetricsEnabled(bc.Server.Metrics.Enabled),
+		WithMetricsPath(bc.Server.Metrics.Path),
+		WithMetricsPort(bc.Server.Metrics.Port),
+		WithMetricsServiceName(bc.Server.Metrics.ServiceName),
+		WithMetricsExcludeItem(bc.Server.Metrics.ExcludeItem),
+		WithMetricsTimeSensitive(bc.Server.Metrics.TimeSensitive),
+		WithTrace(bc.Server.Trace),
+		WithTraceEnabled(bc.Server.Trace.Enabled),
+		WithTraceServiceName(bc.Server.Trace.ServiceName),
+		WithTraceStdout(bc.Server.Trace.Stdout),
+		WithTraceEndpoint(bc.Server.Trace.Endpoint),
+		WithTraceExcludeItem(bc.Server.Trace.ExcludeItem),
+	)
+	if err != nil {
+		return fmt.Errorf("invalid Server config: %v", err)
+	}
+	bc.Server = serCfg
+
+	return nil
 }

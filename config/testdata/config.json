@@ -1,0 +1,22 @@
+{
+    "sql": {
+      "type": "mysql",
+      "host": "127.0.0.1:3306",
+      "user": "user_json",
+      "password": "pass_json",
+      "db": "db_json",
+      "maxIdleConns": 10,
+      "maxOpenConns": 100,
+      "debug": false
+    },
+    "log": {
+      "filename": "./json.log",
+      "maxSize": 5,
+      "maxBackups": 10,
+      "maxAge": 30,
+      "compress": false,
+      "level": "warn",
+      "format": "json",
+      "output": "file"
+    }
+  }

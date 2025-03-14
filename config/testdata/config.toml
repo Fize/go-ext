@@ -1,0 +1,16 @@
+[sql]
+type = "sqlite3"
+db = "./toml.db"
+maxIdleConns = 15
+maxOpenConns = 50
+debug = true
+
+[log]
+filename = "./toml.log"
+maxSize = 2
+maxBackups = 5
+maxAge = 15
+compress = true
+level = "error"
+format = "string"
+output = "stdout"

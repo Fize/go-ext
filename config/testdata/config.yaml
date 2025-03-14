@@ -1,0 +1,32 @@
+sql:
+  type: sqlite3
+  db: ./test.db
+  maxIdleConns: 5
+  maxOpenConns: 10
+  debug: true
+
+log:
+  filename: ./test.log
+  maxSize: 1
+  maxBackups: 3
+  maxAge: 7
+  compress: true
+  level: info
+  format: string
+
+server:
+  bindAddr: "localhost:8080"
+  cors: true
+  doc: true
+  metrics:
+    enabled: true
+    serviceName: "test_service"
+    path: "/metrics"
+    port: 9090
+    timeSensitive: true
+    excludeItem:
+      - "/health"
+      - "/ready"
+  trace:
+    enabled: true
+    endpoint: http://localhost:4317
