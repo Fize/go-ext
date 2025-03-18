@@ -28,16 +28,15 @@ const (
 )
 
 // InitGinServer initializes a new gin server with the given configuration
-func InitGinServer(cfg *config.BaseConfig) *gin.Engine {
+func InitGinServer(cfg *config.BaseConfig) (*gin.Engine, *log.Logger) {
 	r := gin.New()
 	r.Use(middleware.TraceID())
 	initMetrics(r, cfg.Server.Metrics)
 	initTracer(r, cfg.Server.Trace)
-	initLoggerAndRecovery(r, cfg.Log)
-	return r
+	return r, initLoggerAndRecovery(r, cfg.Log)
 }
 
-func initLoggerAndRecovery(r *gin.Engine, cfg *config.LogConfig) {
+func initLoggerAndRecovery(r *gin.Engine, cfg *config.LogConfig) *log.Logger {
 	logger, err := log.InitLogger(cfg)
 	if err != nil {
 		panic(err)
@@ -47,6 +46,7 @@ func initLoggerAndRecovery(r *gin.Engine, cfg *config.LogConfig) {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	r.Use(ginzap.Ginzap(ginlogger, time.RFC3339, true), ginzap.RecoveryWithZap(ginlogger, true))
+	return logger
 }
 
 func initMetrics(r *gin.Engine, cfg *config.Metrics) {

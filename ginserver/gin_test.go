@@ -12,7 +12,7 @@ import (
 
 func TestInitGinServer(t *testing.T) {
 	cfg := config.NewConfig()
-	r := InitGinServer(cfg)
+	r, _ := InitGinServer(cfg)
 	assert.NotNil(t, r)
 }
 
