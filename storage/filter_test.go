@@ -7,12 +7,12 @@ import (
 )
 
 func TestValidateFilter(t *testing.T) {
-	validFilter := map[string]interface{}{
+	validFilter := map[string]any{
 		"name": "test",
 		"age":  30,
 	}
 
-	invalidFilter := map[string]interface{}{
+	invalidFilter := map[string]any{
 		"name; DROP TABLE users; --": "test",
 	}
 

@@ -106,62 +106,62 @@ func (l *Logger) Sync() error {
 }
 
 // Logger methods
-func (l *Logger) Debug(args ...interface{}) {
+func (l *Logger) Debug(args ...any) {
 	l.sugar.Debug(args...)
 }
 
-func (l *Logger) Debugf(template string, args ...interface{}) {
+func (l *Logger) Debugf(template string, args ...any) {
 	l.sugar.Debugf(template, args...)
 }
 
-func (l *Logger) Debugw(msg string, args ...interface{}) {
+func (l *Logger) Debugw(msg string, args ...any) {
 	l.sugar.Debugw(msg, args...)
 }
 
-func (l *Logger) Info(args ...interface{}) {
+func (l *Logger) Info(args ...any) {
 	l.sugar.Info(args...)
 }
 
-func (l *Logger) Infof(template string, args ...interface{}) {
+func (l *Logger) Infof(template string, args ...any) {
 	l.sugar.Infof(template, args...)
 }
 
-func (l *Logger) Infow(msg string, args ...interface{}) {
+func (l *Logger) Infow(msg string, args ...any) {
 	l.sugar.Infow(msg, args...)
 }
 
-func (l *Logger) Warn(args ...interface{}) {
+func (l *Logger) Warn(args ...any) {
 	l.sugar.Warn(args...)
 }
 
-func (l *Logger) Warnf(template string, args ...interface{}) {
+func (l *Logger) Warnf(template string, args ...any) {
 	l.sugar.Warnf(template, args...)
 }
 
-func (l *Logger) Warnw(msg string, args ...interface{}) {
+func (l *Logger) Warnw(msg string, args ...any) {
 	l.sugar.Warnw(msg, args...)
 }
 
-func (l *Logger) Error(args ...interface{}) {
+func (l *Logger) Error(args ...any) {
 	l.sugar.Error(args...)
 }
 
-func (l *Logger) Errorf(template string, args ...interface{}) {
+func (l *Logger) Errorf(template string, args ...any) {
 	l.sugar.Errorf(template, args...)
 }
 
-func (l *Logger) Errorw(err error, args ...interface{}) {
+func (l *Logger) Errorw(err error, args ...any) {
 	l.sugar.Errorw(err.Error(), args...)
 }
 
-func (l *Logger) Fatal(args ...interface{}) {
+func (l *Logger) Fatal(args ...any) {
 	l.sugar.Fatal(args...)
 }
 
-func (l *Logger) Fatalf(template string, args ...interface{}) {
+func (l *Logger) Fatalf(template string, args ...any) {
 	l.sugar.Fatalf(template, args...)
 }
 
-func (l *Logger) Fatalw(msg string, args ...interface{}) {
+func (l *Logger) Fatalw(msg string, args ...any) {
 	l.sugar.Fatalw(msg, args...)
 }

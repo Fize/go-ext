@@ -343,8 +343,8 @@ func TestServerConfigFromYAML(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		got      interface{}
-		expected interface{}
+		got      any
+		expected any
 	}{
 		{"Server.Metrics.Path", cfg.Server.Metrics.Path, "/metrics"},
 		{"Server.Metrics.Port", cfg.Server.Metrics.Port, 9090},
@@ -387,8 +387,8 @@ func TestServerConfigFromEnv(t *testing.T) {
 
 	metricsTests := []struct {
 		name     string
-		got      interface{}
-		expected interface{}
+		got      any
+		expected any
 	}{
 		{"Metrics.Path", cfg.Server.Metrics.Path, "/custom-metrics"},
 		{"Metrics.Port", cfg.Server.Metrics.Port, 9091},

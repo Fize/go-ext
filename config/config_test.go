@@ -85,8 +85,8 @@ func TestLoadFromYAMLFile(t *testing.T) {
 	// Validate database configuration
 	tests := []struct {
 		name     string
-		got      interface{}
-		expected interface{}
+		got      any
+		expected any
 	}{
 		{"SQL.Type", cfg.SQL.Type, "sqlite3"},
 		{"SQL.SQL", cfg.SQL.DB, "./test.db"},
@@ -247,8 +247,8 @@ func TestLoadServerConfig(t *testing.T) {
 	// Validate server configuration
 	tests := []struct {
 		name     string
-		got      interface{}
-		expected interface{}
+		got      any
+		expected any
 	}{
 		{"Server.BindAddr", cfg.Server.BindAddr, "127.0.0.1:8080"},
 		{"Server.Trace.Enabled", cfg.Server.Trace.Enabled, true},

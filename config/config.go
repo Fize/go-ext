@@ -40,18 +40,18 @@ type BaseConfig struct {
 	// log configuration
 	Log *LogConfig `mapstructure:"log"`
 	// custom configuration, can be any type
-	Custom interface{} `mapstructure:"custom"`
+	Custom any `mapstructure:"custom"`
 }
 
 // WithCustomConfig sets the custom configuration
-func WithCustomConfig(custom interface{}) func(*BaseConfig) {
+func WithCustomConfig(custom any) func(*BaseConfig) {
 	return func(bc *BaseConfig) {
 		bc.Custom = custom
 	}
 }
 
 // ParseCustomConfig parses the custom configuration into the provided interface
-func (bc *BaseConfig) ParseCustomConfig(out interface{}) error {
+func (bc *BaseConfig) ParseCustomConfig(out any) error {
 	if bc.Custom == nil {
 		return nil
 	}

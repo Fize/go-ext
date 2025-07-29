@@ -27,7 +27,7 @@ func (l *ZapGormLogger) LogMode(level logger.LogLevel) logger.Interface {
 }
 
 // Info logs an info message
-func (l *ZapGormLogger) Info(ctx context.Context, msg string, data ...interface{}) {
+func (l *ZapGormLogger) Info(ctx context.Context, msg string, data ...any) {
 	if traceID, ok := ctx.Value(traceIDKey).(string); ok && traceID != "" {
 		l.logger.With(zap.String(traceIDKey, traceID)).Sugar().Infow(msg, data...)
 		return
@@ -36,7 +36,7 @@ func (l *ZapGormLogger) Info(ctx context.Context, msg string, data ...interface{
 }
 
 // Warn logs a warning message
-func (l *ZapGormLogger) Warn(ctx context.Context, msg string, data ...interface{}) {
+func (l *ZapGormLogger) Warn(ctx context.Context, msg string, data ...any) {
 	if traceID, ok := ctx.Value(traceIDKey).(string); ok && traceID != "" {
 		l.logger.With(zap.String(traceIDKey, traceID)).Sugar().Warnw(msg, data...)
 		return
@@ -45,7 +45,7 @@ func (l *ZapGormLogger) Warn(ctx context.Context, msg string, data ...interface{
 }
 
 // Error logs an error message
-func (l *ZapGormLogger) Error(ctx context.Context, msg string, data ...interface{}) {
+func (l *ZapGormLogger) Error(ctx context.Context, msg string, data ...any) {
 	if traceID, ok := ctx.Value(traceIDKey).(string); ok && traceID != "" {
 		l.logger.With(zap.String(traceIDKey, traceID)).Sugar().Errorw(msg, data...)
 		return

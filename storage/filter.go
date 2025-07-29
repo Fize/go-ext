@@ -6,7 +6,7 @@ import (
 )
 
 // ValidateFilter validates the filter parameters to prevent SQL injection
-func ValidateFilter(filter map[string]interface{}) error {
+func ValidateFilter(filter map[string]any) error {
 	for key := range filter {
 		if !isValidColumnName(key) {
 			return fmt.Errorf("invalid column name: %s", key)

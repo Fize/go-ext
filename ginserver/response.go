@@ -18,11 +18,11 @@ type State struct {
 type Response struct {
 	State State `json:"state"`
 	// multiple data is a list, single data is a object
-	Data interface{} `json:"data,omitempty"`
+	Data any `json:"data,omitempty"`
 }
 
 // ExceptResponse except response
-func ExceptResponse(code int, msg ...interface{}) *Response {
+func ExceptResponse(code int, msg ...any) *Response {
 	return &Response{
 		State: State{
 			Code: code,
@@ -32,7 +32,7 @@ func ExceptResponse(code int, msg ...interface{}) *Response {
 }
 
 // DataResponse single data response
-func DataResponse(data interface{}) *Response {
+func DataResponse(data any) *Response {
 	return &Response{
 		State: State{
 			Code: 0,
@@ -45,13 +45,13 @@ func DataResponse(data interface{}) *Response {
 // ListData multiple data struct
 type ListData struct {
 	// multiple data
-	Items interface{} `json:"items,omitempty"`
+	Items any `json:"items,omitempty"`
 	// total count
 	Total int `json:"total"`
 }
 
 // ListResponse multiple data response
-func ListResponse(total int, data interface{}) *Response {
+func ListResponse(total int, data any) *Response {
 	return &Response{
 		State: State{
 			Code: 0,

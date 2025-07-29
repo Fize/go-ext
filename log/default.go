@@ -27,91 +27,91 @@ func init() {
 }
 
 // Global functions that use defaultLogger
-func Debug(args ...interface{}) {
+func Debug(args ...any) {
 	if defaultLogger != nil {
 		defaultLogger.Debug(args...)
 	}
 }
 
-func Debugf(template string, args ...interface{}) {
+func Debugf(template string, args ...any) {
 	if defaultLogger != nil {
 		defaultLogger.Debugf(template, args...)
 	}
 }
 
-func Debugw(msg string, args ...interface{}) {
+func Debugw(msg string, args ...any) {
 	if defaultLogger != nil {
 		defaultLogger.Debugw(msg, args...)
 	}
 }
 
-func Info(args ...interface{}) {
+func Info(args ...any) {
 	if defaultLogger != nil {
 		defaultLogger.Info(args...)
 	}
 }
 
-func Infof(template string, args ...interface{}) {
+func Infof(template string, args ...any) {
 	if defaultLogger != nil {
 		defaultLogger.Infof(template, args...)
 	}
 }
 
-func Infow(msg string, args ...interface{}) {
+func Infow(msg string, args ...any) {
 	if defaultLogger != nil {
 		defaultLogger.Infow(msg, args...)
 	}
 }
 
-func Warn(args ...interface{}) {
+func Warn(args ...any) {
 	if defaultLogger != nil {
 		defaultLogger.Warn(args...)
 	}
 }
 
-func Warnf(template string, args ...interface{}) {
+func Warnf(template string, args ...any) {
 	if defaultLogger != nil {
 		defaultLogger.Warnf(template, args...)
 	}
 }
 
-func Warnw(msg string, args ...interface{}) {
+func Warnw(msg string, args ...any) {
 	if defaultLogger != nil {
 		defaultLogger.Warnw(msg, args...)
 	}
 }
 
-func Error(args ...interface{}) {
+func Error(args ...any) {
 	if defaultLogger != nil {
 		defaultLogger.Error(args...)
 	}
 }
 
-func Errorf(template string, args ...interface{}) {
+func Errorf(template string, args ...any) {
 	if defaultLogger != nil {
 		defaultLogger.Errorf(template, args...)
 	}
 }
 
-func Errorw(err error, args ...interface{}) {
+func Errorw(err error, args ...any) {
 	if defaultLogger != nil {
 		defaultLogger.Errorw(err, args...)
 	}
 }
 
-func Fatal(args ...interface{}) {
+func Fatal(args ...any) {
 	if defaultLogger != nil {
 		defaultLogger.Fatal(args...)
 	}
 }
 
-func Fatalf(template string, args ...interface{}) {
+func Fatalf(template string, args ...any) {
 	if defaultLogger != nil {
 		defaultLogger.Fatalf(template, args...)
 	}
 }
 
-func Fatalw(msg string, args ...interface{}) {
+func Fatalw(msg string, args ...any) {
 	if defaultLogger != nil {
 		defaultLogger.Fatalw(msg, args...)
 	}

@@ -95,7 +95,7 @@ func TestGetBy(t *testing.T) {
 
 	model := &TestModel{ID: 1, Name: "test"}
 	rows := sqlmock.NewRows([]string{"id", "name"}).AddRow(model.ID, model.Name)
-	filter := map[string]interface{}{"name": "test"}
+	filter := map[string]any{"name": "test"}
 
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `test_models` WHERE `name` = ? ORDER BY `test_models`.`id` LIMIT ?")).
 		WithArgs(filter["name"], 1).
@@ -137,7 +137,7 @@ func TestUpdateBy(t *testing.T) {
 	store := &sqlStorage{db: db}
 	ctx := context.Background()
 
-	filter := map[string]interface{}{"name": "test"}
+	filter := map[string]any{"name": "test"}
 	updateData := &TestModel{Name: "updated"}
 
 	// Add transaction expectations
@@ -180,7 +180,7 @@ func TestDeleteBy(t *testing.T) {
 	store := &sqlStorage{db: db}
 	ctx := context.Background()
 
-	filter := map[string]interface{}{"name": "test"}
+	filter := map[string]any{"name": "test"}
 	mock.ExpectBegin()
 	mock.ExpectExec(regexp.QuoteMeta("DELETE FROM `test_models` WHERE `name` = ?")).
 		WithArgs(filter["name"]).
@@ -252,7 +252,7 @@ func TestListWithFilter(t *testing.T) {
 		WillReturnRows(dataRows)
 
 	query := Query{
-		Filter: map[string]interface{}{"name": "test1"},
+		Filter: map[string]any{"name": "test1"},
 		Page:   1,
 		Size:   10,
 		Sort:   map[string]string{"id": "asc"},

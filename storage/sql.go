@@ -41,22 +41,22 @@ func NewSQLStorage(cfg *config.SQLConfig) Storage {
 }
 
 // Client implements Storage.Client
-func (s *sqlStorage) Client() interface{} {
+func (s *sqlStorage) Client() any {
 	return s.db
 }
 
 // Create implements Storage.Create
-func (s *sqlStorage) Create(ctx context.Context, model interface{}) error {
+func (s *sqlStorage) Create(ctx context.Context, model any) error {
 	return s.db.WithContext(ctx).Create(model).Error
 }
 
 // Get implements Storage.Get
-func (s *sqlStorage) Get(ctx context.Context, id uint64, result interface{}) error {
+func (s *sqlStorage) Get(ctx context.Context, id uint64, result any) error {
 	return s.db.WithContext(ctx).Model(result).First(result, id).Error
 }
 
 // GetBy implements Storage.GetBy
-func (s *sqlStorage) GetBy(ctx context.Context, filter map[string]interface{}, result interface{}) error {
+func (s *sqlStorage) GetBy(ctx context.Context, filter map[string]any, result any) error {
 	if err := ValidateFilter(filter); err != nil {
 		return err
 	}
@@ -64,12 +64,12 @@ func (s *sqlStorage) GetBy(ctx context.Context, filter map[string]interface{}, r
 }
 
 // Update implements Storage.Update
-func (s *sqlStorage) Update(ctx context.Context, id uint64, data interface{}) error {
+func (s *sqlStorage) Update(ctx context.Context, id uint64, data any) error {
 	return s.db.WithContext(ctx).Model(data).Where("id = ?", id).Save(data).Error
 }
 
 // UpdateBy implements Storage.UpdateBy
-func (s *sqlStorage) UpdateBy(ctx context.Context, filter map[string]interface{}, data interface{}) error {
+func (s *sqlStorage) UpdateBy(ctx context.Context, filter map[string]any, data any) error {
 	if err := ValidateFilter(filter); err != nil {
 		return err
 	}
@@ -85,12 +85,12 @@ func (s *sqlStorage) UpdateBy(ctx context.Context, filter map[string]interface{}
 
 // Delete implements Storage.Delete
 // If the record does not exist, it returns nil without error.
-func (s *sqlStorage) Delete(ctx context.Context, id uint64, model interface{}) error {
+func (s *sqlStorage) Delete(ctx context.Context, id uint64, model any) error {
 	return s.db.WithContext(ctx).Unscoped().Model(model).Delete("id = ?", id).Error
 }
 
 // DeleteBy implements Storage.DeleteBy
-func (s *sqlStorage) DeleteBy(ctx context.Context, filter map[string]interface{}, model interface{}) error {
+func (s *sqlStorage) DeleteBy(ctx context.Context, filter map[string]any, model any) error {
 	if len(filter) == 0 {
 		return errors.New("filter cannot be empty")
 	}
@@ -104,7 +104,7 @@ func (s *sqlStorage) DeleteBy(ctx context.Context, filter map[string]interface{}
 // If the association key is not empty, it will perform an association query.
 // If the preload key is not empty, it will perform preloading.
 // If both keys are not empty, it will return use association query.
-func (s *sqlStorage) List(ctx context.Context, query *Query, mainModel, assModel interface{}) (int64, error) {
+func (s *sqlStorage) List(ctx context.Context, query *Query, mainModel, assModel any) (int64, error) {
 	db := s.db.WithContext(ctx).Model(mainModel)
 	// Count total records
 
